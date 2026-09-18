@@ -1,0 +1,27 @@
+[theme]
+# Dark, editorial surface. These four values must stay in step with the tokens
+# in app/utils/config.py (PAGE, SURFACE, INK, BRAND) — Streamlit paints its own
+# widgets from here, the custom stylesheet paints everything else, and a
+# mismatch shows as cards that do not sit on their own background.
+#
+# The two era hues (blue #3987e5 / orange #d95926) are reserved for data and
+# never used for chrome, so nothing in the interface can be mistaken for a
+# series colour. Spain red is the brand accent only.
+base = "dark"
+primaryColor = "#e2213a"
+backgroundColor = "#0d0d0d"
+secondaryBackgroundColor = "#1a1a19"
+textColor = "#ffffff"
+font = "sans serif"
+
+[server]
+# The event CSVs are read-only inputs; no uploads are expected.
+maxUploadSize = 5
+enableStaticServing = false
+
+[browser]
+gatherUsageStats = false
+
+[client]
+showErrorDetails = true
+toolbarMode = "minimal"

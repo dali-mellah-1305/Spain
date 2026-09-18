@@ -1,0 +1,13 @@
+# Spain's Evolution — Streamlit dashboard
+#
+# Lower bounds, not pins: these are the versions the app was built and tested
+# against. mplsoccer is capped below 1.5 because 1.5+ requires Python 3.10
+# (it imports dataclasses.KW_ONLY); drop the cap if you are on 3.10 or newer.
+
+# >=1.49 for width="stretch" on st.dataframe / st.pyplot / st.button
+streamlit>=1.49,<2
+pandas>=2.0,<3
+numpy>=1.24,<3
+plotly>=5.18,<7
+matplotlib>=3.7,<4
+mplsoccer>=1.1,<1.5

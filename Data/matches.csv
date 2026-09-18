@@ -1,0 +1,26 @@
+match_id,date,competition,tournament,era,manager,round,spain_venue,opponent,spain_score,opp_score,result,extra_time,penalties,penalty_score,venue_city,data_source,sb_match_id,wc2026_file
+EURO2020_M1,2021-06-14,UEFA Euro 2020,EURO2020,Luis Enrique,Luis Enrique,Group Stage,neutral,Sweden,0,0,D,False,False,,Seville,StatsBomb Open Data,3788750.0,
+EURO2020_M2,2021-06-19,UEFA Euro 2020,EURO2020,Luis Enrique,Luis Enrique,Group Stage,neutral,Poland,1,1,D,False,False,,Seville,StatsBomb Open Data,3788762.0,
+EURO2020_M3,2021-06-23,UEFA Euro 2020,EURO2020,Luis Enrique,Luis Enrique,Group Stage,neutral,Slovakia,5,0,W,False,False,,Seville,StatsBomb Open Data,3788775.0,
+EURO2020_M4,2021-06-28,UEFA Euro 2020,EURO2020,Luis Enrique,Luis Enrique,Round of 16,neutral,Croatia,5,3,W,True,False,,Copenhagen,StatsBomb Open Data,3794686.0,
+EURO2020_M5,2021-07-02,UEFA Euro 2020,EURO2020,Luis Enrique,Luis Enrique,Quarter-finals,neutral,Switzerland,1,1,W,True,True,3-1,Saint Petersburg,StatsBomb Open Data,3795108.0,
+EURO2020_M6,2021-07-06,UEFA Euro 2020,EURO2020,Luis Enrique,Luis Enrique,Semi-finals,neutral,Italy,1,1,L,True,True,2-4,London,StatsBomb Open Data,3795220.0,
+WC2022_M1,2022-11-23,FIFA World Cup 2022,WC2022,Luis Enrique,Luis Enrique,Group Stage,neutral,Costa Rica,7,0,W,False,False,,Al Khor,StatsBomb Open Data,3857291.0,
+WC2022_M2,2022-11-27,FIFA World Cup 2022,WC2022,Luis Enrique,Luis Enrique,Group Stage,neutral,Germany,1,1,D,False,False,,Al Khor,StatsBomb Open Data,3857263.0,
+WC2022_M3,2022-12-01,FIFA World Cup 2022,WC2022,Luis Enrique,Luis Enrique,Group Stage,neutral,Japan,1,2,L,False,False,,Al Wakrah,StatsBomb Open Data,3857255.0,
+WC2022_M4,2022-12-06,FIFA World Cup 2022,WC2022,Luis Enrique,Luis Enrique,Round of 16,neutral,Morocco,0,0,L,True,True,0-3,Al Rayyan,StatsBomb Open Data,3869220.0,
+EURO2024_M1,2024-06-15,UEFA Euro 2024,EURO2024,Luis de la Fuente,Luis de la Fuente,Group Stage,neutral,Croatia,3,0,W,False,False,,Berlin,StatsBomb Open Data,3930160.0,
+EURO2024_M2,2024-06-20,UEFA Euro 2024,EURO2024,Luis de la Fuente,Luis de la Fuente,Group Stage,neutral,Italy,1,0,W,False,False,,Gelsenkirchen,StatsBomb Open Data,3930172.0,
+EURO2024_M3,2024-06-24,UEFA Euro 2024,EURO2024,Luis de la Fuente,Luis de la Fuente,Group Stage,neutral,Albania,1,0,W,False,False,,Dusseldorf,StatsBomb Open Data,3930179.0,
+EURO2024_M4,2024-06-30,UEFA Euro 2024,EURO2024,Luis de la Fuente,Luis de la Fuente,Round of 16,neutral,Georgia,4,1,W,False,False,,Cologne,StatsBomb Open Data,3941018.0,
+EURO2024_M5,2024-07-05,UEFA Euro 2024,EURO2024,Luis de la Fuente,Luis de la Fuente,Quarter-finals,neutral,Germany,2,1,W,True,False,,Stuttgart,StatsBomb Open Data,3942226.0,
+EURO2024_M6,2024-07-09,UEFA Euro 2024,EURO2024,Luis de la Fuente,Luis de la Fuente,Semi-finals,neutral,France,2,1,W,False,False,,Munich,StatsBomb Open Data,3942752.0,
+EURO2024_M7,2024-07-14,UEFA Euro 2024,EURO2024,Luis de la Fuente,Luis de la Fuente,Final,neutral,England,2,1,W,False,False,,Berlin,StatsBomb Open Data,3943043.0,
+WC2026_M1,2026-06-15,FIFA World Cup 2026,WC2026,Luis de la Fuente,Luis de la Fuente,Group Stage,neutral,Cape Verde,0,0,D,False,False,,Atlanta,WhoScored (via nlbair/wc2026-events),,wc2026_spain_vs_cabo_verde_2026-06-15_events.csv
+WC2026_M2,2026-06-21,FIFA World Cup 2026,WC2026,Luis de la Fuente,Luis de la Fuente,Group Stage,neutral,Saudi Arabia,4,0,W,False,False,,Atlanta,WhoScored (via nlbair/wc2026-events),,wc2026_spain_vs_saudi_arabia_2026-06-21_events.csv
+WC2026_M3,2026-06-27,FIFA World Cup 2026,WC2026,Luis de la Fuente,Luis de la Fuente,Group Stage,neutral,Uruguay,1,0,W,False,False,,Zapopan,WhoScored (via nlbair/wc2026-events),,wc2026_uruguay_vs_spain_2026-06-27_events.csv
+WC2026_M4,2026-07-02,FIFA World Cup 2026,WC2026,Luis de la Fuente,Luis de la Fuente,Round of 32,neutral,Austria,3,0,W,False,False,,Inglewood,WhoScored (via nlbair/wc2026-events),,wc2026_spain_vs_austria_2026-07-02_events.csv
+WC2026_M5,2026-07-06,FIFA World Cup 2026,WC2026,Luis de la Fuente,Luis de la Fuente,Round of 16,neutral,Portugal,1,0,W,True,False,,Arlington,WhoScored (via nlbair/wc2026-events),,wc2026_portugal_vs_spain_2026-07-06_events.csv
+WC2026_M6,2026-07-10,FIFA World Cup 2026,WC2026,Luis de la Fuente,Luis de la Fuente,Quarter-finals,neutral,Belgium,2,1,W,False,False,,Inglewood,WhoScored (via nlbair/wc2026-events),,wc2026_spain_vs_belgium_2026-07-10_events.csv
+WC2026_M7,2026-07-14,FIFA World Cup 2026,WC2026,Luis de la Fuente,Luis de la Fuente,Semi-finals,neutral,France,2,0,W,False,False,,Arlington,WhoScored (via nlbair/wc2026-events),,wc2026_france_vs_spain_2026-07-14_events.csv
+WC2026_M8,2026-07-19,FIFA World Cup 2026,WC2026,Luis de la Fuente,Luis de la Fuente,Final,neutral,Argentina,1,0,W,True,False,,East Rutherford,WhoScored (via nlbair/wc2026-events),,wc2026_spain_vs_argentina_2026-07-19_events.csv

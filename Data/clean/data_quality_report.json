@@ -1,0 +1,566 @@
+{
+  "generated_utc": "2026-09-18 17:14 UTC",
+  "source_dir": "Data",
+  "output_dir": "data\\clean",
+  "all_checks_passed": true,
+  "tables": {
+    "matches": {
+      "rows": 25,
+      "cols_in": 19,
+      "cols_out": 30
+    },
+    "team_stats": {
+      "rows": 50,
+      "cols_in": 30,
+      "cols_out": 65
+    },
+    "player_stats": {
+      "rows": 796,
+      "cols_in": 30,
+      "cols_out": 57
+    },
+    "players": {
+      "rows": 415,
+      "cols_in": 23,
+      "cols_out": 42
+    },
+    "shots": {
+      "rows": 642,
+      "cols_in": 27,
+      "cols_out": 49
+    },
+    "passes": {
+      "rows": 28903,
+      "cols_in": 31,
+      "cols_out": 52
+    },
+    "carries": {
+      "rows": 16249,
+      "cols_in": 20,
+      "cols_out": 35
+    },
+    "defensive_actions": {
+      "rows": 12725,
+      "cols_in": 18,
+      "cols_out": 34
+    },
+    "eda_team_summary_by_era": {
+      "rows": 2,
+      "cols_in": 27,
+      "cols_out": 31
+    },
+    "eda_team_summary_by_tournament": {
+      "rows": 4,
+      "cols_in": 27,
+      "cols_out": 31
+    }
+  },
+  "actions": [
+    {
+      "table": "matches",
+      "column": "opponent",
+      "kind": "harmonise",
+      "detail": "'Cape Verde' -> 'Cabo Verde' (one spelling across all tables)",
+      "rows_affected": 1
+    },
+    {
+      "table": "matches",
+      "column": "source_short",
+      "kind": "derive",
+      "detail": "Short provenance label ('StatsBomb' / 'WhoScored') derived from `data_source`, whose three verbose spellings name only two datasets",
+      "rows_affected": 25
+    },
+    {
+      "table": "matches",
+      "column": "goal_difference / scoreline",
+      "kind": "derive",
+      "detail": "Convenience columns for KPI cards and match tables",
+      "rows_affected": 25
+    },
+    {
+      "table": "matches",
+      "column": "label",
+      "kind": "derive",
+      "detail": "Human-readable one-line match label for the match selector",
+      "rows_affected": 25
+    },
+    {
+      "table": "matches",
+      "column": "has_carries / has_pressures / has_official_xg / has_positions",
+      "kind": "derive",
+      "detail": "Per-match coverage flags for the metric families that exist in StatsBomb but not in the Opta-taxonomy WC2026 source (README §5), so the app can label a gap instead of implying zero",
+      "rows_affected": 25
+    },
+    {
+      "table": "matches",
+      "column": "match_no_in_era / match_no_overall",
+      "kind": "derive",
+      "detail": "Chronological match counters for trend charts",
+      "rows_affected": 25
+    },
+    {
+      "table": "team_stats",
+      "column": "source_short",
+      "kind": "derive",
+      "detail": "Short provenance label ('StatsBomb' / 'WhoScored') derived from `source`, whose three verbose spellings name only two datasets",
+      "rows_affected": 50
+    },
+    {
+      "table": "team_stats",
+      "column": "xg_quality",
+      "kind": "derive",
+      "detail": "'official' / 'estimated' token derived from `xg_note` for UI badges",
+      "rows_affected": 50
+    },
+    {
+      "table": "team_stats",
+      "column": "era / manager / round / opponent / match_result / extra_time",
+      "kind": "derive",
+      "detail": "Match context joined in from matches.csv so every event row carries its era without a second lookup",
+      "rows_affected": 50
+    },
+    {
+      "table": "team_stats",
+      "column": "match_minutes + *_per90",
+      "kind": "derive",
+      "detail": "20 per-90 columns, normalised by 120 minutes for extra-time matches and 90 otherwise (same rule as the EDA summaries)",
+      "rows_affected": 50
+    },
+    {
+      "table": "team_stats",
+      "column": "xg_per_shot / shot_accuracy_pct / goals_minus_xg",
+      "kind": "derive",
+      "detail": "Shot-quality ratios (NaN, not 0, when a team took no shots)",
+      "rows_affected": 50
+    },
+    {
+      "table": "player_stats",
+      "column": "source_short",
+      "kind": "derive",
+      "detail": "Short provenance label ('StatsBomb' / 'WhoScored') derived from `source`, whose three verbose spellings name only two datasets",
+      "rows_affected": 796
+    },
+    {
+      "table": "player_stats",
+      "column": "player_canonical",
+      "kind": "repair",
+      "detail": "Mapped the remaining raw StatsBomb legal name to its common name ('José Luis Sanmartín Mato' -> 'Joselu'), per README §4",
+      "rows_affected": 2
+    },
+    {
+      "table": "player_stats",
+      "column": "xg_quality",
+      "kind": "derive",
+      "detail": "'official' / 'estimated' token derived from `xg_note` for UI badges",
+      "rows_affected": 796
+    },
+    {
+      "table": "player_stats",
+      "column": "era / manager / round / opponent / match_result / extra_time",
+      "kind": "derive",
+      "detail": "Match context joined in from matches.csv so every event row carries its era without a second lookup",
+      "rows_affected": 796
+    },
+    {
+      "table": "player_stats",
+      "column": "*_per90",
+      "kind": "derive",
+      "detail": "Per-90 columns from `minutes_played`; NaN (never inf or 0) where minutes are unknown — 98 WC2026 rows have no substitution events",
+      "rows_affected": 796
+    },
+    {
+      "table": "player_stats",
+      "column": "goal_contributions",
+      "kind": "derive",
+      "detail": "goals + key passes (assists are not logged in both sources, so key passes stand in — labelled as such in the UI)",
+      "rows_affected": 796
+    },
+    {
+      "table": "players",
+      "column": "player_canonical",
+      "kind": "repair",
+      "detail": "Mapped the remaining raw StatsBomb legal name to its common name ('José Luis Sanmartín Mato' -> 'Joselu'), per README §4",
+      "rows_affected": 1
+    },
+    {
+      "table": "players",
+      "column": "n_tournaments / n_eras / bridges_eras",
+      "kind": "derive",
+      "detail": "Counts parsed from the comma-joined `tournaments` / `eras` strings; `bridges_eras` marks the players who played under both managers",
+      "rows_affected": 415
+    },
+    {
+      "table": "players",
+      "column": "*_per90",
+      "kind": "derive",
+      "detail": "Career per-90 columns over `minutes_played_total`",
+      "rows_affected": 415
+    },
+    {
+      "table": "players",
+      "column": "minutes_per_match",
+      "kind": "derive",
+      "detail": "Average minutes per appearance",
+      "rows_affected": 415
+    },
+    {
+      "table": "shots",
+      "column": "source_short",
+      "kind": "derive",
+      "detail": "Short provenance label ('StatsBomb' / 'WhoScored') derived from `source`, whose three verbose spellings name only two datasets",
+      "rows_affected": 642
+    },
+    {
+      "table": "shots",
+      "column": "period_no / period_label / is_shootout",
+      "kind": "harmonise",
+      "detail": "StatsBomb's numeric periods (1-5) and Opta's names ('FirstHalf', 'FirstPeriodOfExtraTime', ...) collapsed onto one 1-5 scale; period 5 flagged as penalty shootout",
+      "rows_affected": 642
+    },
+    {
+      "table": "shots",
+      "column": "player_canonical",
+      "kind": "repair",
+      "detail": "Mapped the remaining raw StatsBomb legal name to its common name ('José Luis Sanmartín Mato' -> 'Joselu'), per README §4",
+      "rows_affected": 3
+    },
+    {
+      "table": "shots",
+      "column": "body_part",
+      "kind": "repair",
+      "detail": "Literal string 'True' (a source parsing artifact, not a body part) replaced with NaN",
+      "rows_affected": 1
+    },
+    {
+      "table": "shots",
+      "column": "shot_type",
+      "kind": "repair",
+      "detail": "`shot_type` set to 'Own Goal' where `is_own_goal` was true but the type said 'Open Play' (WC2026 own-goal row)",
+      "rows_affected": 1
+    },
+    {
+      "table": "shots",
+      "column": "player / player_canonical",
+      "kind": "repair",
+      "detail": "Own goals carry no shooter in the source; labelled explicitly instead of NaN so they are visible rather than silently dropped",
+      "rows_affected": 6
+    },
+    {
+      "table": "shots",
+      "column": "outcome_std",
+      "kind": "harmonise",
+      "detail": "StatsBomb's 8 outcome labels and Opta's 3 mapped onto one scale (Goal / Saved / Off target / Blocked / Woodwork)",
+      "rows_affected": 642
+    },
+    {
+      "table": "shots",
+      "column": "is_goal / is_on_target / is_penalty",
+      "kind": "derive",
+      "detail": "Boolean flags; `is_on_target` is defined to reproduce team_stats.csv's own `shots_on_target` tally exactly (asserted in the validation pass)",
+      "rows_affected": 642
+    },
+    {
+      "table": "shots",
+      "column": "has_xg / xg_quality",
+      "kind": "derive",
+      "detail": "xG provenance as a short token; the 7 own-goal rows have no xG in any source and are marked 'not applicable' rather than 0",
+      "rows_affected": 642
+    },
+    {
+      "table": "shots",
+      "column": "counts_as_shot / counts_as_goal",
+      "kind": "derive",
+      "detail": "The counting basis behind team_stats.csv: shots exclude penalty shootouts and own goals; goals exclude shootouts but include own goals, credited to the benefiting team",
+      "rows_affected": 642
+    },
+    {
+      "table": "shots",
+      "column": "distance_to_goal",
+      "kind": "derive",
+      "detail": "Distance from the shot to the goal centre on the common 0-100 pitch (comparable across both coordinate systems)",
+      "rows_affected": 642
+    },
+    {
+      "table": "shots",
+      "column": "era / manager / round / opponent / match_result / extra_time",
+      "kind": "derive",
+      "detail": "Match context joined in from matches.csv so every event row carries its era without a second lookup",
+      "rows_affected": 642
+    },
+    {
+      "table": "passes",
+      "column": "source_short",
+      "kind": "derive",
+      "detail": "Short provenance label ('StatsBomb' / 'WhoScored') derived from `source`, whose three verbose spellings name only two datasets",
+      "rows_affected": 28903
+    },
+    {
+      "table": "passes",
+      "column": "period_no / period_label / is_shootout",
+      "kind": "harmonise",
+      "detail": "StatsBomb's numeric periods (1-5) and Opta's names ('FirstHalf', 'FirstPeriodOfExtraTime', ...) collapsed onto one 1-5 scale; period 5 flagged as penalty shootout",
+      "rows_affected": 28903
+    },
+    {
+      "table": "passes",
+      "column": "player_canonical",
+      "kind": "repair",
+      "detail": "Mapped the remaining raw StatsBomb legal name to its common name ('José Luis Sanmartín Mato' -> 'Joselu'), per README §4",
+      "rows_affected": 14
+    },
+    {
+      "table": "passes",
+      "column": "is_complete",
+      "kind": "derive",
+      "detail": "One boolean for completion; the raw `outcome` has 6 values (Complete / Incomplete / Out / Unknown / Pass Offside / Injury Clearance), only the first of which is a completed pass",
+      "rows_affected": 28903
+    },
+    {
+      "table": "passes",
+      "column": "is_set_piece / is_open_play",
+      "kind": "derive",
+      "detail": "Set-piece grouping over `pass_type` so open-play passing can be isolated",
+      "rows_affected": 28903
+    },
+    {
+      "table": "passes",
+      "column": "normalized_end_x / normalized_end_y",
+      "kind": "derive",
+      "detail": "Pass end points rescaled onto the common 0-100 pitch (StatsBomb ÷120/÷80; Opta unchanged) — the start points already had this, the end points did not, so pass-arrow charts could not mix sources",
+      "rows_affected": 28903
+    },
+    {
+      "table": "passes",
+      "column": "pass_distance / is_forward",
+      "kind": "derive",
+      "detail": "Pass length on the common pitch and direction of travel; the raw `length` column is in each source's own units and is not comparable",
+      "rows_affected": 28903
+    },
+    {
+      "table": "passes",
+      "column": "pitch_third",
+      "kind": "derive",
+      "detail": "Which third the pass started in, on the common 0-100 pitch",
+      "rows_affected": 28903
+    },
+    {
+      "table": "passes",
+      "column": "era / manager / round / opponent / match_result / extra_time",
+      "kind": "derive",
+      "detail": "Match context joined in from matches.csv so every event row carries its era without a second lookup",
+      "rows_affected": 28903
+    },
+    {
+      "table": "carries",
+      "column": "source_short",
+      "kind": "derive",
+      "detail": "Short provenance label ('StatsBomb' / 'WhoScored') derived from `source`, whose three verbose spellings name only two datasets",
+      "rows_affected": 16249
+    },
+    {
+      "table": "carries",
+      "column": "period_no / period_label / is_shootout",
+      "kind": "harmonise",
+      "detail": "StatsBomb's numeric periods (1-5) and Opta's names ('FirstHalf', 'FirstPeriodOfExtraTime', ...) collapsed onto one 1-5 scale; period 5 flagged as penalty shootout",
+      "rows_affected": 16249
+    },
+    {
+      "table": "carries",
+      "column": "player_canonical",
+      "kind": "repair",
+      "detail": "Mapped the remaining raw StatsBomb legal name to its common name ('José Luis Sanmartín Mato' -> 'Joselu'), per README §4",
+      "rows_affected": 11
+    },
+    {
+      "table": "carries",
+      "column": "normalized_end_x / normalized_end_y",
+      "kind": "derive",
+      "detail": "Carry end points on the common 0-100 pitch",
+      "rows_affected": 16249
+    },
+    {
+      "table": "carries",
+      "column": "era / manager / round / opponent / match_result / extra_time",
+      "kind": "derive",
+      "detail": "Match context joined in from matches.csv so every event row carries its era without a second lookup",
+      "rows_affected": 16249
+    },
+    {
+      "table": "defensive_actions",
+      "column": "source_short",
+      "kind": "derive",
+      "detail": "Short provenance label ('StatsBomb' / 'WhoScored') derived from `source`, whose three verbose spellings name only two datasets",
+      "rows_affected": 12725
+    },
+    {
+      "table": "defensive_actions",
+      "column": "period_no / period_label / is_shootout",
+      "kind": "harmonise",
+      "detail": "StatsBomb's numeric periods (1-5) and Opta's names ('FirstHalf', 'FirstPeriodOfExtraTime', ...) collapsed onto one 1-5 scale; period 5 flagged as penalty shootout",
+      "rows_affected": 12725
+    },
+    {
+      "table": "defensive_actions",
+      "column": "player_canonical",
+      "kind": "repair",
+      "detail": "Mapped the remaining raw StatsBomb legal name to its common name ('José Luis Sanmartín Mato' -> 'Joselu'), per README §4",
+      "rows_affected": 26
+    },
+    {
+      "table": "defensive_actions",
+      "column": "action_type",
+      "kind": "harmonise",
+      "detail": "Opta's 'Foul' and StatsBomb's 'Foul Committed' were two categories for one event; merged into 'Foul Committed'",
+      "rows_affected": 392
+    },
+    {
+      "table": "defensive_actions",
+      "column": "action_group",
+      "kind": "derive",
+      "detail": "Short action grouping for the event-type filter",
+      "rows_affected": 12725
+    },
+    {
+      "table": "defensive_actions",
+      "column": "is_successful",
+      "kind": "derive",
+      "detail": "Success boolean over the 8 source outcome labels; note 61.7% of rows log no outcome at all (mostly pressures), which read as not-successful — use with the outcome column, not alone",
+      "rows_affected": 12725
+    },
+    {
+      "table": "defensive_actions",
+      "column": "defensive_third",
+      "kind": "derive",
+      "detail": "Pitch third of the action — the basis for a pressing-height read",
+      "rows_affected": 12725
+    },
+    {
+      "table": "defensive_actions",
+      "column": "era / manager / round / opponent / match_result / extra_time",
+      "kind": "derive",
+      "detail": "Match context joined in from matches.csv so every event row carries its era without a second lookup",
+      "rows_affected": 12725
+    },
+    {
+      "table": "eda_team_summary_by_era",
+      "column": "win_pct / points_per_match / xg_per_shot / shot_accuracy_pct",
+      "kind": "derive",
+      "detail": "Rates used directly by the Overview KPI cards",
+      "rows_affected": 2
+    },
+    {
+      "table": "eda_team_summary_by_tournament",
+      "column": "win_pct / points_per_match / xg_per_shot / shot_accuracy_pct",
+      "kind": "derive",
+      "detail": "Rates used directly by the Overview KPI cards",
+      "rows_affected": 4
+    }
+  ],
+  "checks": [
+    {
+      "check": "matches.csv holds 25 unique matches",
+      "status": "PASS",
+      "detail": "25 rows"
+    },
+    {
+      "check": "Era split is 10 Luis Enrique / 15 Luis de la Fuente",
+      "status": "PASS",
+      "detail": "{'Luis Enrique': 10, 'Luis de la Fuente': 15}"
+    },
+    {
+      "check": "passes: every match_id exists in matches.csv",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "shots: every match_id exists in matches.csv",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "carries: every match_id exists in matches.csv",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "defensive_actions: every match_id exists in matches.csv",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "team_stats: every match_id exists in matches.csv",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "player_stats: every match_id exists in matches.csv",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "Goals in shots.csv reconcile with every scoreline in matches.csv",
+      "status": "PASS",
+      "detail": "all 25 matches agree"
+    },
+    {
+      "check": "shots.csv flags reproduce team_stats.csv `shots` for all 50 team-matches",
+      "status": "PASS",
+      "detail": "exact"
+    },
+    {
+      "check": "shots.csv flags reproduce team_stats.csv `shots_on_target` for all 50 team-matches",
+      "status": "PASS",
+      "detail": "exact"
+    },
+    {
+      "check": "passes.csv reproduces team_stats.csv pass counts",
+      "status": "PASS",
+      "detail": "exact"
+    },
+    {
+      "check": "Possession proxy sums to 100% in every match",
+      "status": "PASS",
+      "detail": "range 100.00–100.00"
+    },
+    {
+      "check": "carries.csv covers exactly the 17 StatsBomb matches",
+      "status": "PASS",
+      "detail": "17 matches"
+    },
+    {
+      "check": "WC2026 carries/pressures stay NaN (never zero-filled)",
+      "status": "PASS",
+      "detail": "all NaN as documented in README §5"
+    },
+    {
+      "check": "passes: normalized coordinates inside the 0-100 pitch",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "shots: normalized coordinates inside the 0-100 pitch",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "carries: normalized coordinates inside the 0-100 pitch",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "defensive_actions: normalized coordinates inside the 0-100 pitch",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "Team names are consistent across every table",
+      "status": "PASS",
+      "detail": "22 teams, one spelling each"
+    },
+    {
+      "check": "No duplicate rows remain in any table",
+      "status": "PASS",
+      "detail": "10 tables checked"
+    }
+  ]
+}
