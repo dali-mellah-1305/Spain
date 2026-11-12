@@ -530,6 +530,62 @@ def player_era_bars(split: pd.DataFrame, metrics: Sequence[str],
                    height=max(240, 42 * len(df) + 110), ygrid=False, xgrid=True)
 
 
+def player_radar(radar: pd.DataFrame, *, kind: str = "radar", title: str = "",
+                 subtitle: str = "") -> go.Figure:
+    """One player under both managers, as a radar or a pizza chart.
+
+    ``radar`` is the tidy frame from ``metrics.player_radar``: one row per era
+    and axis, with the raw per-90 ``value`` and its ``percentile`` (the radius).
+    """
+    if radar.empty:
+        return _finish(go.Figure(), title=title, subtitle=subtitle)
+    labels = list(dict.fromkeys(radar["label"]))
+    step = 360 / len(labels)
+    centre = {label: i * step for i, label in enumerate(labels)}
+    eras = [e for e in C.ERAS if e in set(radar["era"])]
+
+    fig = go.Figure()
+    for i, era in enumerate(eras):
+        df = radar[(radar["era"] == era) & radar["percentile"].notna()]
+        if df.empty:
+            continue
+        custom = np.stack([df["label"], df["value"].map(lambda v: _fmt(v, 2))], -1)
+        hover = (f"<b>%{{customdata[0]}}</b><br>{era}<br>Percentile: %{{r:.0f}}"
+                 "<br>Value: %{customdata[1]}<extra></extra>")
+        theta = df["label"].map(centre)
+        if kind == "pizza":
+            shift = (i - (len(eras) - 1) / 2) * step * 0.44
+            fig.add_trace(go.Barpolar(
+                r=df["percentile"], theta=theta + shift, width=step * 0.42,
+                name=era, customdata=custom, hovertemplate=hover,
+                marker=dict(color=C.era_color(era),
+                            line=dict(color=C.SURFACE, width=2))))
+        else:
+            closed = lambda s: list(s) + [s.iloc[0]]  # noqa: E731
+            fig.add_trace(go.Scatterpolar(
+                r=closed(df["percentile"]), theta=closed(theta), name=era,
+                mode="lines+markers", fill="toself",
+                fillcolor=C.ERA_FILL.get(era), customdata=closed(pd.Series(
+                    list(custom))), hovertemplate=hover,
+                line=dict(color=C.era_color(era), width=2),
+                marker=dict(size=8, color=C.era_color(era))))
+
+    fig.update_layout(polar=dict(
+        bgcolor=C.SURFACE,
+        radialaxis=dict(range=[0, 100], tickvals=[25, 50, 75, 100], angle=90,
+                        tickangle=90, gridcolor=C.GRID, linecolor=C.GRID,
+                        tickfont=dict(size=10, color=C.INK_MUTED)),
+        angularaxis=dict(direction="clockwise", rotation=90, thetaunit="degrees",
+                         tickvals=list(centre.values()), ticktext=labels,
+                         gridcolor=C.GRID, linecolor=C.AXIS,
+                         tickfont=dict(size=12, color=C.INK))))
+    fig = _finish(fig, title=title, subtitle=subtitle, height=520,
+                  showlegend=True)
+    fig.update_layout(margin=dict(l=90, r=90, b=40,
+                                  t=fig.layout.margin.t + 30))
+    return fig
+
+
 def player_scatter(players: pd.DataFrame, x: str, y: str, *, x_label: str,
                    y_label: str, size: Optional[str] = None,
                    title: str = "", subtitle: str = "",

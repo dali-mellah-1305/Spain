@@ -166,8 +166,7 @@ def render(era: str, *, page_no: int, lede: str, character: str,
                         "Goals": stats["goals"],
                         "xG": round(stats["xg"], 2) if pd.notna(stats["xg"]) else None,
                         "xG per shot": round(stats["xg_per_shot"], 3)
-                        if pd.notna(stats["xg_per_shot"]) else None,
-                        "Official xG %": round(stats["pct_official_xg"], 0)})
+                        if pd.notna(stats["xg_per_shot"]) else None})
     ui.table_view(pd.DataFrame(summary), "Show the shot totals")
 
     # ---- territory ------------------------------------------------------ #
@@ -209,11 +208,7 @@ def render(era: str, *, page_no: int, lede: str, character: str,
             "network can be drawn — this is a source limitation, not an empty "
             "result.", kind="gap")
     else:
-        labels = dict(zip(network_matches["match_id"], network_matches["label"]))
-        match_id = st.selectbox(
-            "Match", network_matches["match_id"].tolist(),
-            format_func=lambda mid: labels.get(mid, mid),
-            key=f"{key_prefix}_network_match")
+        match_id = network_matches["match_id"].tolist()[-1]
         match_passes = passes[passes["match_id"] == match_id]
         nodes, edges = M.passing_network(match_passes, min_passes=3)
         row = network_matches[network_matches["match_id"] == match_id].iloc[0]

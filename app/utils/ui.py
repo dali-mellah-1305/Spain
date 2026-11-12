@@ -432,12 +432,8 @@ def empty_state(message: str, hint: str = "") -> None:
 
 
 def footer(sources: str = "") -> None:
-    st.markdown(
-        f'<div class="foot">{sources or ""}'
-        "Event data: StatsBomb Open Data (EURO 2020, World Cup 2022, EURO 2024) "
-        "and nlbair/wc2026-events, WhoScored-sourced (World Cup 2026). "
-        "Possession is a proxy; World Cup 2026 xG is model-estimated. "
-        "See <code>data/clean/data_quality_report.md</code> for every cleaning "
-        "rule and consistency check applied to the underlying tables."
-        "</div>",
-        unsafe_allow_html=True)
+    # The data-source line that used to close every page now lives in the
+    # root README (§1); only a page-specific note is rendered here.
+    if sources:
+        st.markdown(f'<div class="foot">{sources}</div>',
+                    unsafe_allow_html=True)

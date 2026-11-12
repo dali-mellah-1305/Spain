@@ -116,7 +116,7 @@ ui.section("Shot maps",
            "rather than official. Own goals and penalty-shootout kicks are "
            "excluded, matching the aggregate tables.")
 
-view = st.radio("Split by", ["Tournament", "Era", "All together"],
+view = st.radio("Split by", ["Tournament", "Era"],
                 horizontal=True, key="shot_map_view")
 
 if view == "Tournament":
@@ -124,25 +124,11 @@ if view == "Tournament":
         shots, "tournament", [t for t in C.TOURNAMENTS if t in sel.tournaments],
         labels=C.TOURNAMENT_LABEL, era_of=C.TOURNAMENT_ERA),
         width="stretch")
-elif view == "Era":
+else:
     st.pyplot(cm.shot_maps_by_group(
         shots, "era", [e for e in C.ERAS if e in sel.eras],
         labels={e: e for e in C.ERAS}, era_of={e: e for e in C.ERAS},
         figsize=(9.5, 5.6)), width="stretch")
-else:
-    left, right = st.columns([1.3, 1], gap="large")
-    with left:
-        st.pyplot(cm.shot_map(
-            shots, era=sel.single_era or C.ERAS[1],
-            title="All shots in the selection", note=sel.describe(),
-            figsize=(6.8, 5.6)), width="stretch")
-    with right:
-        st.plotly_chart(
-            cp.xg_histogram(shots,
-                            title="Shot quality distribution",
-                            subtitle="Where each era's shots sit on the xG "
-                                     "scale, as a share of that era's shots"),
-            use_container_width=True, config={"displayModeBar": False})
 
 group_summary = []
 group_col = "tournament" if view == "Tournament" else "era"
@@ -160,7 +146,6 @@ for group in (C.TOURNAMENTS if group_col == "tournament" else C.ERAS):
         "xG per shot": round(stats["xg_per_shot"], 3)
         if pd.notna(stats["xg_per_shot"]) else None,
         "Accuracy %": round(stats["accuracy_pct"], 1),
-        "Official xG %": round(stats["pct_official_xg"], 0),
     })
 ui.table_view(pd.DataFrame(group_summary), "Show the shot totals")
 

@@ -189,12 +189,11 @@ if note:
 ui.section("Every match in the selection")
 
 table = matches[["date", "tournament", "round", "opponent", "scoreline",
-                 "result", "extra_time", "penalty_score", "venue_city",
-                 "source_short"]].copy()
+                 "result", "extra_time", "penalty_score", "venue_city"]].copy()
 table["date"] = pd.to_datetime(table["date"]).dt.strftime("%d %b %Y")
 table["tournament"] = table["tournament"].map(C.TOURNAMENT_LABEL)
 table.columns = ["Date", "Tournament", "Round", "Opponent", "Spain – Opp",
-                 "Result", "Extra time", "Penalties", "City", "Data source"]
+                 "Result", "Extra time", "Penalties", "City"]
 st.dataframe(table, width="stretch", hide_index=True, height=420)
 
 ui.footer()

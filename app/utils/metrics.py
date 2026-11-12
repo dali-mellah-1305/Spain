@@ -430,6 +430,91 @@ def player_era_split(player_stats: pd.DataFrame, player: str,
     return pd.DataFrame(out)
 
 
+#: Axes of the player radar: (key, label, base column, StatsBomb matches only).
+#: xG, carries and tackles are restricted to the StatsBomb matches — World Cup
+#: 2026 has only estimated xG, no carry events and no player-level tackles, and
+#: a gap must not be averaged in as a zero.
+RADAR_METRICS = [
+    ("passes_completed", "Passes completed", "passes_completed", False),
+    ("pass_pct", "Pass completion %", None, False),
+    ("progressive_passes", "Progressive passes", "progressive_passes", False),
+    ("key_passes", "Key passes", "key_passes", False),
+    ("crosses", "Crosses", "crosses", False),
+    ("shots", "Shots", "shots", False),
+    ("xg", "xG", "xg", True),
+    ("goals", "Goals", "goals", False),
+    ("progressive_carries", "Progressive carries", "progressive_carries", True),
+    ("tackles", "Tackles", "tackles", True),
+    ("interceptions", "Interceptions", "interceptions", False),
+    ("recoveries", "Ball recoveries", "recoveries", False),
+]
+
+
+def _radar_rates(rows: pd.DataFrame, min_minutes: float) -> dict:
+    """Per-90 value of every radar axis for one player under one manager."""
+    rows = rows[rows["minutes_played"].notna()]
+    out = {"minutes": float(rows["minutes_played"].sum())}
+    for key, _, base, sb_only in RADAR_METRICS:
+        r = rows[rows["source_short"] == "StatsBomb"] if sb_only else rows
+        minutes = r["minutes_played"].sum()
+        if minutes < min_minutes:
+            out[key] = np.nan
+        elif key == "pass_pct":
+            attempted = r["passes_attempted"].sum()
+            out[key] = (r["passes_completed"].sum() / attempted * 100
+                        if attempted else np.nan)
+        else:
+            out[key] = r[base].sum() / minutes * 90.0
+    return out
+
+
+def player_radar(player_stats: pd.DataFrame, player: str,
+                 min_minutes: float = 90, pool_minutes: float = 180
+                 ) -> pd.DataFrame:
+    """One player's radar under each manager, as percentiles.
+
+    Each axis is the player's per-90 value ranked against every Spain outfield
+    player-under-one-manager entry with ``pool_minutes`` or more, so both eras
+    sit on the same 0-100 scale. An era with under ``min_minutes`` is left out.
+    Returns an empty frame for a goalkeeper: the data has no goalkeeping events.
+    """
+    position = (player_stats.dropna(subset=["position"])
+                .groupby("player_canonical")["position"]
+                .agg(lambda s: s.mode().iloc[0]))
+    keepers = set(position[position == "Goalkeeper"].index)
+    if player in keepers:
+        return pd.DataFrame()
+
+    pool, subject = [], {}
+    for (name, era), rows in player_stats.groupby(["player_canonical", "era"],
+                                                  observed=True):
+        if name in keepers:
+            continue
+        if name == player:
+            subject[era] = _radar_rates(rows, min_minutes)
+        rates = _radar_rates(rows, pool_minutes)
+        if rates["minutes"] >= pool_minutes:
+            pool.append(rates)
+    pool = pd.DataFrame(pool)
+
+    out = []
+    for era in C.ERAS:
+        rates = subject.get(era)
+        if not rates or rates["minutes"] < min_minutes:
+            continue
+        for key, label, _, _ in RADAR_METRICS:
+            value = rates[key]
+            ref = pool[key].dropna() if key in pool else pd.Series(dtype=float)
+            pct = np.nan
+            if pd.notna(value) and len(ref):
+                pct = ((ref < value).sum() + 0.5 * (ref == value).sum()) \
+                    / len(ref) * 100
+            out.append({"era": era, "metric": key, "label": label,
+                        "value": value, "percentile": pct,
+                        "minutes": rates["minutes"]})
+    return pd.DataFrame(out)
+
+
 def squad_turnover(player_stats: pd.DataFrame) -> pd.DataFrame:
     """Which players each era used, and how the two squads overlap."""
     spain = player_stats[player_stats["is_spain"]]

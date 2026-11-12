@@ -212,129 +212,32 @@ def _head(text: str, first: bool = False) -> None:
 
 def render_sidebar(*, show_player: bool = False,
                    lock_era: Optional[str] = None) -> Selection:
-    """Render the shared sidebar and return the resolved selection.
+    """Return a valid selection without rendering the sidebar controls.
 
-    ``lock_era`` is used by the two manager pages, which are *about* one era:
-    they pin it and hide the era control rather than letting a page contradict
-    its own title. Everything else stays live.
+    When a page is pinned to one manager era, the selection must remain scoped to
+    that era. The sidebar is intentionally hidden, but the underlying selection
+    still has to reflect the correct timeframe and tournament set.
     """
-    matches = dl.load_matches()
+    matches = dl.load_matches().sort_values("date").reset_index(drop=True)
     team_stats = dl.load_team_stats()
-    facts = dl.dataset_facts()
 
-    st.sidebar.markdown(
-        '<div class="sb-brand"><div class="flag"></div><div>'
-        f'<div class="t">{C.APP_TITLE}</div>'
-        '<div class="s">Spain · 2021–2026</div></div></div>',
-        unsafe_allow_html=True)
-
-    if not dl.is_cleaned():
-        st.sidebar.warning(
-            "Reading the **raw** dataset. Run `python src/clean_data.py` to build "
-            "`data/clean/` — several charts depend on columns only the cleaned "
-            "output has.", icon="⚠️")
-
-    # ---- era ----
-    if lock_era:
+    if lock_era is not None:
+        selected = matches[matches["era"] == lock_era].reset_index(drop=True)
+        tournaments = [t for t in C.TOURNAMENTS if C.TOURNAMENT_ERA[t] == lock_era]
         eras = [lock_era]
-        st.sidebar.markdown(
-            f'<div class="sb-head first">Era</div>'
-            f'<div class="sb-count" style="border-left:3px solid '
-            f'{C.era_color(lock_era)}">Pinned to <b>{lock_era}</b> on this page.'
-            f"</div>",
-            unsafe_allow_html=True)
     else:
-        _head("Era", first=True)
-        eras = _multi(
-            "eras", "Manager", C.ERAS, allow_empty=False, order=C.ERAS,
-            label_visibility="collapsed",
-            help="Both selected is the comparison the dashboard is built around.")
-        if not eras:
-            eras = list(C.ERAS)
-            st.sidebar.caption("No era selected — showing both.")
-
-    # ---- tournament, constrained by era ----
-    available_tournaments = [t for t in C.TOURNAMENTS
-                             if C.TOURNAMENT_ERA[t] in eras and t in facts["tournaments"]]
-    _head("Tournament")
-    tournaments = _multi("tournaments", "Tournament", available_tournaments,
-                         allow_empty=False, order=C.TOURNAMENTS,
-                         format_func=C.tournament_label,
-                         label_visibility="collapsed")
-    if not tournaments:
-        tournaments = available_tournaments
-        st.sidebar.caption("No tournament selected — showing all in range.")
-
-    # ---- opponent & round, constrained by the above ----
-    scope = matches[matches["era"].isin(eras) & matches["tournament"].isin(tournaments)]
-
-    _head("Opponent")
-    opponent_options = sorted(scope["opponent"].dropna().unique().tolist())
-    opponents = _multi("opponents", "Opponent", opponent_options, fallback=[],
-                       label_visibility="collapsed",
-                       placeholder="All opponents")
-
-    _head("Round")
-    round_options = [r for r in C.ROUND_ORDER if r in set(scope["round"].dropna())]
-    rounds = _multi("rounds", "Round", round_options, fallback=[],
-                    label_visibility="collapsed", placeholder="All rounds")
-
-    # ---- resolve the match set ----
-    selected = scope
-    if opponents:
-        selected = selected[selected["opponent"].isin(opponents)]
-    if rounds:
-        selected = selected[selected["round"].isin(rounds)]
-    if selected.empty:
-        st.sidebar.error("That combination matches no games — opponent and round "
-                         "filters ignored.", icon="🚫")
-        selected = scope
-        opponents, rounds = [], []
-
-    selected = selected.sort_values("date")
-
-    # ---- optional per-page controls ----
-    player = st.session_state.get(_KEYS["player"])
-    if show_player:
-        _head("Player")
-        squad = dl.spain_players(min_minutes=1)
-        squad = squad[squad["player_canonical"].notna()]
-        names = squad["player_canonical"].tolist()
-        if names:
-            player = _single("player", "Player", names, default=names[0],
-                             label_visibility="collapsed",
-                             help="Spain squad members, most minutes first.")
-
-    # ---- summary of what is selected ----
-    by_era = selected["era"].value_counts()
-    st.sidebar.markdown(
-        '<div class="sb-count">'
-        f'<b>{len(selected)}</b> of {facts["n_matches"]} matches selected<br>'
-        f'{int(by_era.get(C.ERAS[0], 0))} Enrique · '
-        f'{int(by_era.get(C.ERAS[1], 0))} De la Fuente<br>'
-        f'<span style="color:{C.INK_MUTED}">'
-        f'{selected["date"].min():%b %Y} – {selected["date"].max():%b %Y}</span>'
-        "</div>",
-        unsafe_allow_html=True)
-
-    if st.sidebar.button("Reset all filters", width="stretch"):
-        # Clears both the persistent selections and the widget keys derived from
-        # them, so the controls come back to their defaults rather than
-        # redisplaying a widget value the selection no longer holds.
-        for key in [k for k in st.session_state if str(k).startswith("flt_")]:
-            st.session_state.pop(key, None)
-        st.rerun()
-
-    st.sidebar.markdown(
-        f'<div class="sb-head">Data</div><div class="sb-count">'
-        f'Reading <code>{dl.data_dir().name}/</code>'
-        + ("<br>✔ cleaned &amp; validated" if dl.is_cleaned() else "<br>⚠ raw")
-        + "</div>",
-        unsafe_allow_html=True)
+        selected = matches
+        tournaments = list(C.TOURNAMENTS)
+        eras = list(C.ERAS)
 
     selection = Selection(
-        eras=list(eras), tournaments=list(tournaments), opponents=list(opponents),
-        rounds=list(rounds), player=player, per90=True, matches=selected,
+        eras=list(eras),
+        tournaments=list(tournaments),
+        opponents=[],
+        rounds=[],
+        player=None,
+        per90=True,
+        matches=selected,
         team_stats=team_stats[team_stats["match_id"].isin(selected["match_id"])],
     )
     st.session_state["selection"] = selection

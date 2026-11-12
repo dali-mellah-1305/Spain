@@ -13,6 +13,7 @@ import streamlit as st
 from utils import charts_mplsoccer as cm
 from utils import charts_plotly as cp
 from utils import config as C
+from utils import data_loader as dl
 from utils import filters, metrics as M, ui
 
 ui.page_setup("Passing", icon="🎯")
@@ -250,22 +251,13 @@ else:
                 ui.table_view(top, f"Strongest connections — {row['opponent']}")
 
     if compare_networks and len(options) > 1:
-        default_a = next((m for m in options if m.startswith("EURO2020")), options[0])
-        default_b = next((m for m in options if m.startswith("EURO2024")), options[-1])
+        default_a = options[0]
+        default_b = options[-1]
         col_a, col_b = st.columns(2, gap="large")
-        with col_a:
-            a = st.selectbox("Left", options, index=options.index(default_a),
-                             format_func=lambda m: labels.get(m, m), key="net_a")
-        with col_b:
-            b = st.selectbox("Right", options, index=options.index(default_b),
-                             format_func=lambda m: labels.get(m, m), key="net_b")
-        col_a, col_b = st.columns(2, gap="large")
-        draw_network(a, col_a)
-        draw_network(b, col_b)
+        draw_network(default_a, col_a)
+        draw_network(default_b, col_b)
     else:
-        single = st.selectbox("Match", options,
-                              format_func=lambda m: labels.get(m, m),
-                              key="net_single")
+        single = options[-1]
         draw_network(single, st.container())
 
 # --------------------------------------------------------------------------- #
@@ -277,47 +269,60 @@ ui.section("Pass map",
            "solid, so a large selection is sampled evenly and the caption says "
            "by how much — the heatmaps above are the better view at scale.")
 
-match_labels = dict(zip(sel.matches["match_id"], sel.matches["label"]))
-map_match = st.selectbox("Match", sel.matches["match_id"].tolist(),
-                         format_func=lambda m: match_labels.get(m, m),
-                         key="pass_map_match")
-map_passes = passes[passes["match_id"] == map_match]
-map_row = sel.matches[sel.matches["match_id"] == map_match].iloc[0]
+all_matches = dl.load_matches().sort_values("date").reset_index(drop=True)
+featured_match_ids = ["EURO2024_M7", "EURO2020_M6", "WC2022_M4", "WC2026_M8"]
+featured_matches = all_matches[all_matches["match_id"].isin(featured_match_ids)]
+match_labels = dict(zip(featured_matches["match_id"], featured_matches["label"]))
+match_order = [match_id for match_id in featured_match_ids if match_id in match_labels]
 
 filter_col, chart_col = st.columns([1, 3], gap="large")
 with filter_col:
+    st.markdown("**Matches**")
+    selected_match_ids = [
+        match_id for match_id in match_order
+        if st.checkbox(match_labels[match_id], value=True,
+                       key=f"pass_map_match_{match_id}")
+    ]
     subset_choice = st.radio(
         "Show", ["All passes", "Progressive only", "Into the final third",
                  "Into the box", "Key passes", "Crosses"], key="pass_map_subset")
     show_incomplete = st.checkbox("Include incomplete passes", value=True,
                                   key="pass_map_incomplete")
-subset = {
-    "All passes": map_passes,
-    "Progressive only": map_passes[map_passes["is_progressive"]],
-    "Into the final third": map_passes[map_passes["into_final_third"]],
-    "Into the box": map_passes[map_passes["into_penalty_area"]],
-    "Key passes": map_passes[map_passes["is_key_pass"]],
-    "Crosses": map_passes[map_passes["is_cross"]],
-}[subset_choice]
-with chart_col:
-    st.pyplot(cm.pass_map(
-        subset, era=map_row["era"],
-        title=f"Spain vs {map_row['opponent']} — {subset_choice.lower()}",
-        note=f"{C.tournament_label(map_row['tournament'])} {map_row['round']} · "
-             f"{map_row['scoreline']}",
-        show_incomplete=show_incomplete, figsize=(8.4, 5.4)),
-        width="stretch")
 
-passers = (map_passes.groupby("player_canonical", observed=True)
-           .agg(passes=("is_complete", "size"), completed=("is_complete", "sum"),
-                progressive=("is_progressive", "sum"),
-                into_final_third=("into_final_third", "sum"),
-                key_passes=("is_key_pass", "sum")).reset_index())
-if not passers.empty:
-    passers["pass %"] = (passers["completed"] / passers["passes"] * 100).round(1)
-    passers = passers.sort_values("passes", ascending=False)
-    passers.columns = ["Player", "Passes", "Completed", "Progressive",
-                       "Into final third", "Key passes", "Pass %"]
-    ui.table_view(passers, "Show every passer in this match")
+with chart_col:
+    if not selected_match_ids:
+        ui.empty_state("Select at least one match.",
+                       "Choose a Spain match from the list to show its pass map.")
+    for map_match in selected_match_ids:
+        map_passes = passes[passes["match_id"] == map_match]
+        map_row = all_matches[all_matches["match_id"] == map_match].iloc[0]
+        subset = {
+            "All passes": map_passes,
+            "Progressive only": map_passes[map_passes["is_progressive"]],
+            "Into the final third": map_passes[map_passes["into_final_third"]],
+            "Into the box": map_passes[map_passes["into_penalty_area"]],
+            "Key passes": map_passes[map_passes["is_key_pass"]],
+            "Crosses": map_passes[map_passes["is_cross"]],
+        }[subset_choice]
+        st.pyplot(cm.pass_map(
+            subset, era=map_row["era"],
+            title=f"Spain vs {map_row['opponent']} — {subset_choice.lower()}",
+            note=f"{C.tournament_label(map_row['tournament'])} {map_row['round']} · "
+                 f"{map_row['scoreline']}",
+            show_incomplete=show_incomplete, figsize=(8.4, 5.4)),
+            width="stretch")
+
+        passers = (map_passes.groupby("player_canonical", observed=True)
+                   .agg(passes=("is_complete", "size"),
+                        completed=("is_complete", "sum"),
+                        progressive=("is_progressive", "sum"),
+                        into_final_third=("into_final_third", "sum"),
+                        key_passes=("is_key_pass", "sum")).reset_index())
+        if not passers.empty:
+            passers["pass %"] = (passers["completed"] / passers["passes"] * 100).round(1)
+            passers = passers.sort_values("passes", ascending=False)
+            passers.columns = ["Player", "Passes", "Completed", "Progressive",
+                               "Into final third", "Key passes", "Pass %"]
+            ui.table_view(passers, f"Show every passer — Spain vs {map_row['opponent']}")
 
 ui.footer()

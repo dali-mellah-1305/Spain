@@ -19,6 +19,17 @@ Not yet done: possession-sequence chains (needs a `possessions.csv` that the WC2
 | FBref | (attempted) | — | Aggregate box-score stats | **Not used** — FBref rate-limited/blocked automated access during this collection (its own anti-scraping policy caps external requests). It also only exposes aggregate per-match stats, not event coordinates, so it could not have supplied the pass-map/shot-map/passing-network data the project needs anyway. |
 | Wikipedia / ESPN / Goal.com / press reports | All 4 | — | Used only to confirm match dates, opponents, scorelines, venues, and manager-tenure boundaries for `matches.csv` — cross-checked against the goal events actually present in the StatsBomb/WhoScored data (see §4). | — |
 
+**Source per match.** The dashboard's match table (Overview page) no longer shows a "Data source" column; the mapping is by tournament, with no exceptions:
+
+| Tournament | Era | Spain matches | Data source |
+|---|---|---|---|
+| EURO 2020 | Luis Enrique | 6 | StatsBomb |
+| World Cup 2022 | Luis Enrique | 4 | StatsBomb |
+| EURO 2024 | Luis de la Fuente | 7 | StatsBomb |
+| World Cup 2026 | Luis de la Fuente | 8 | WhoScored (nlbair/wc2026-events) |
+
+**In short** (this line used to close every dashboard page): event data is StatsBomb Open Data (EURO 2020, World Cup 2022, EURO 2024) and nlbair/wc2026-events, WhoScored-sourced (World Cup 2026). Possession is a proxy; World Cup 2026 xG is model-estimated. See `data/clean/data_quality_report.md` for every cleaning rule and consistency check applied to the underlying tables.
+
 No data was fabricated. Where a variable is not available from either source (see §3), it is left blank (`NaN`), not estimated.
 
 ## 2. Coverage
